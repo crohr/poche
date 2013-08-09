@@ -11,6 +11,7 @@
                         <li><a title="{% trans "delete" %}" class="tool delete" href="./?action=delete&id={{ entry.id|e }}"><span></span></a></li>
                         {% if constant('SHARE_TWITTER') == 1 %}<li><a href="https://twitter.com/home?status={{entry.title}}%20{{ entry.url|e }}%20via%20@getpoche" target="_blank" class="tool twitter" title="{% trans "tweet" %}"><span></span></a></li>{% endif %}
                         {% if constant('SHARE_MAIL') == 1 %}<li><a href="mailto:?subject={{ entry.title|e }}&body={{ entry.url|e }} via @getpoche" class="tool email" title="{% trans "email" %}"><span></span></a></li>{% endif %}
+                        <li><a href="./?action=epub&id={{ entry.id|e }}">epub</a></li>
                     </li>
                 </ul>
             </div>

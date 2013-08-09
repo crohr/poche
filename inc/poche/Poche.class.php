@@ -177,6 +177,10 @@ class Poche
                     Tools::redirect();
                 }
                 break;
+            case 'epub' :
+                $this->epub($id);
+                Tools::logm('epub link #' . $id);
+                break;
             default:
                 break;
         }
@@ -485,5 +489,51 @@ class Poche
            file_put_contents($cache_file, $version, LOCK_EX);
         }
         return $version;
+    }
+
+    public function epub($id)
+    {
+        $entry = $this->store->retrieveOneById($id, $this->user->getId());
+        if ($entry != NULL) {
+            Tools::logm('epub link #' . $id);
+            $book = new EPub();
+            $content = $entry['content'];
+            if (function_exists('tidy_parse_string')) {
+                $tidy = tidy_parse_string($content, array('indent'=>true, 'show-body-only' => true), 'UTF8');
+                $tidy->cleanRepair();
+                $content = $tidy->value;
+            }
+
+            $content_start =
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            . "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+            . "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+            . "<head>"
+            . "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+            . "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
+            . "<title>Test Book</title>\n"
+            . "</head>\n"
+            . "<body>\n";
+
+            $content = $content_start . $content . "</body>\n</html>\n";
+
+            $book->setTitle($entry['title']);
+            $book->setIdentifier($entry['url'], EPub::IDENTIFIER_URI);
+            $book->setDescription(substr($content, 0, 150) . '...');
+            $domainName = Tools::getDomain($entry['url']);
+            $book->setAuthor($domainName, Tools::getDomain($entry['url']));
+            $book->setPublisher("poche", "http://inthepoche.com/");
+            $book->setDate(time());
+            $book->setRights($entry['url']);
+            $book->setSourceURL($entry['url']);
+            $book->addChapter($entry['title'], "page.html", $content, true, EPub::EXTERNAL_REF_ADD);
+            $book->finalize();
+            $book->saveBook('epub-filename', '.');
+            $zipData = $book->sendBook($domainName);
+        }
+        else {
+            Tools::logm('error in epub call : entry is null #' . $id);
+        }
     }
 }

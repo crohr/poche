@@ -46,6 +46,7 @@ require_once './vendor/autoload.php';
 require_once './inc/3rdparty/simple_html_dom.php';
 require_once './inc/3rdparty/paginator.php';
 require_once './inc/3rdparty/Session.class.php';
+require_once './inc/3rdparty/epub/EPub.php';
 
 if (DOWNLOAD_PICTURES) {
     require_once './inc/poche/pochePictures.php';
