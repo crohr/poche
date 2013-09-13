@@ -162,6 +162,10 @@ class Database {
 
         switch ($view)
         {
+            case 'all':
+                $sql    = "SELECT * FROM entries ";
+                $params = array();
+                break;
             case 'archive':
                 $sql    = "SELECT * FROM entries WHERE user_id=? AND is_read=? " . $order;
                 $params = array($user_id, 1);
