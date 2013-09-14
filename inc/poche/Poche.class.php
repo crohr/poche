@@ -31,6 +31,62 @@ class Poche
         {
             $this->install();
         }
+
+        if (OFFLINE_STORAGE)
+        {
+            $this->generateCacheManifest();
+        }
+    }
+
+    private function generateCacheManifest() 
+    {
+        $manifest = '';
+        $manifest .= "CACHE MANIFEST\n";
+
+        $hashes = "";
+        $manifest .= './?view=home' . "\n";
+        $manifest .= './?view=fav' . "\n";
+        $manifest .= './?view=archive' . "\n";
+        $manifest .= 'tpl/css/knacss.css' . "\n";
+        $manifest .= 'tpl/css/style.css' . "\n";
+        $manifest .= 'tpl/css/style-light.css' . "\n";
+        $manifest .= 'tpl/css/print.css' . "\n";
+        $manifest .= 'tpl/img/favicon.ico' . "\n";
+        $manifest .= 'tpl/img/logo.png' . "\n";
+        $manifest .= 'tpl/img/light/backtotop.png' . "\n";
+        $manifest .= 'tpl/img/light/checkmark-off.png' . "\n";
+        $manifest .= 'tpl/img/light/checkmark-on.png' . "\n";
+        $manifest .= 'tpl/img/light/down.png' . "\n";
+        $manifest .= 'tpl/img/light/envelop.png' . "\n";
+        $manifest .= 'tpl/img/light/flattr.png' . "\n";
+        $manifest .= 'tpl/img/light/left.png' . "\n";
+        $manifest .= 'tpl/img/light/remove.png' . "\n";
+        $manifest .= 'tpl/img/light/shaarli.png' . "\n";
+        $manifest .= 'tpl/img/light/star-off.png' . "\n";
+        $manifest .= 'tpl/img/light/star-on.png' . "\n";
+        $manifest .= 'tpl/img/light/top.png' . "\n";
+        $manifest .= 'tpl/img/light/twitter.png' . "\n";
+        $manifest .= 'tpl/js/jquery-2.0.3.min.js' . "\n";
+
+        $entries = $this->store->getEntriesByView('all', 0);
+        foreach ($entries as $key => $entry) {
+            $url = 'index.php?view=view&id=' . $entry['id'];
+            $manifest .= $url . "\n";
+            $hashes .= md5($url);
+        }
+
+        $manifest .= "# Hash: " . md5($hashes) . "\n";
+
+        $manifest .= 'FALLBACK:' . "\n";
+        $manifest .= '/ offline.html' . "\n";
+
+        $manifest .= 'NETWORK:' . "\n";
+        $manifest .= 'http://*' . "\n";
+        $manifest .= '*' . "\n";
+
+        $fp = fopen('./poche.appcache', 'w');
+        fwrite($fp, $manifest);
+        fclose($fp);
     }
 
     /**
